@@ -25,8 +25,8 @@ hyperparameters affected results.
 
 ## 🧪 Evaluation
 
-Models were evaluated on the test set using: - Accuracy - Precision,
-Recall, F1-score - Confusion Matrix
+Models were evaluated on the test set using: Accuracy, Precision,
+Recall, F1-score, and Confusion Matrix
 
 The best-performing model was selected based on these metrics.
 
@@ -43,5 +43,6 @@ The best-performing model was selected based on these metrics.
 
 
 3.  Run the App:
+
 
         streamlit run app/app.py
