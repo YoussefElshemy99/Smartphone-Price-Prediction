@@ -1,0 +1,18 @@
+# IDE/Editor files
+.idea/
+.vscode/
+*.iml
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Git/System
+.git/
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
