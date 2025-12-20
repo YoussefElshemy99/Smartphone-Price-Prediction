@@ -53,14 +53,12 @@ def train_random_forest(X_train, y_train, X_val, y_val):
     return best_model
 
 # KNN--MODEL
-# src/knn_training.py
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from src.evaluation import evaluate_model  # استخدم نفس evaluation function
 
 def train_knn(features_train, target_train, features_val, target_val, features_test, target_test, tune_hyperparameters=True):
-    """Train KNN using the new preprocessing pipeline"""
     print("\n" + "=" * 70)
     print("🔍 TRAINING K-NEAREST NEIGHBORS")
     print("=" * 70)
@@ -81,20 +79,17 @@ def train_knn(features_train, target_train, features_val, target_val, features_t
         grid_search.fit(features_train, target_train)
 
         best_params = grid_search.best_params_
-        print(f"  ✅ Best parameters: {best_params}")
-        print(f"  ✅ Best CV score: {grid_search.best_score_:.4f}")
+        print(f"  Best parameters: {best_params}")
+        print(f"  Best CV score: {grid_search.best_score_:.4f}")
 
         model = grid_search.best_estimator_
     else:
         model = KNeighborsClassifier(n_neighbors=5, weights='distance', metric='euclidean')
 
-    print("\n[2/3] Training Final Model...")
     model.fit(features_train, target_train)
 
-    print("\n[3/3] Evaluating on Validation Set...")
     evaluate_model(model, features_val, target_val, "KNN (Validation)")
 
-    print("\n[4/3] Evaluating on Test Set...")
     evaluate_model(model, features_test, target_test, "KNN (Test)")
 
     return model
