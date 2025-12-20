@@ -1,8 +1,8 @@
 import pandas as pd
 
 # Load the dataset
-train_df = pd.read_csv('data\\raw\\train.csv')
-test_df = pd.read_csv('data\\raw\\test.csv')
+train_df = pd.read_csv('C:\\Users\\Youssef Elshemy\\Documents\\Projects\\Smartphone-Price-Prediction\\data\\raw\\train.csv')
+test_df = pd.read_csv('C:\\Users\\Youssef Elshemy\\Documents\\Projects\\Smartphone-Price-Prediction\\data\\raw\\test.csv')
 
 # Basic info
 print("🔹 Train Dataset Info:")
