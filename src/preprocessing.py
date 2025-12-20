@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 
-def get_preprocessed_data(train_path='data\\raw\\train.csv', test_path='data\\raw\\test.csv'):
+def get_preprocessed_data(train_path='/Users/hala/PycharmProjects/Smartphone-Price-Prediction/data/raw/train.csv', test_path='/Users/hala/PycharmProjects/Smartphone-Price-Prediction/data/raw/test.csv'):
     # Load Data
     train = pd.read_csv(train_path)
     test = pd.read_csv(test_path)
