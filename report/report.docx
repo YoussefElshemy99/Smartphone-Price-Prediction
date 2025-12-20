@@ -1,0 +1,33 @@
+Logistic Regression – Modeling Step
+
+Preprocessing Techniques:
+
+-The dataset was checked for missing or null values and cleaned during preprocessing.
+-Feature scaling was applied in the preprocessing stage to ensure all numerical features were on the same scale.
+-The target variable (price_range) was separated from the input features.
+-The dataset was split into training and validation sets to allow proper model training and evaluation.
+
+Data Analysis and Visualization:
+-Exploratory Data Analysis (EDA) was performed to understand feature distributions and relationships.
+-Correlation analysis and visualizations were used to study how smartphone features affect each other.
+-Features such as RAM, battery capacity, and internal memory showed a strong influence on the price range.
+
+Model Used:
+
+-Logistic Regression was applied as a supervised learning algorithm for multi-class classification.
+
+Hyperparameters Used:
+
+-Regularization strength (C): 0.01, 0.1, and 1.0
+-Maximum number of iterations (max_iter): 1000
+-Optimization solver: lbfgs
+-Multi-class handling method: auto
+
+Additional Techniques to Enhance Results:
+-Hyperparameter tuning was performed by testing multiple values of the regularization parameter.
+-Validation accuracy was used to select the best-performing Logistic Regression model.
+
+Final Conclusion:
+Logistic Regression was successfully used as a baseline classification model for smartphone price prediction and its performance was compared with more advanced models such as Random Forest.
+
+
