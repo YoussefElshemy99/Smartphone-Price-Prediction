@@ -18,6 +18,12 @@ def main():
         features_validation, target_validation,
         features_test, target_test
     )
+    
+    nb = train_naive_bayes(features_train, target_train, features_validation, target_validation)
+    evaluate_model(nb, features_test, target_test, "NaiveBayes")
+
+
 
 if __name__ == "__main__":
+
     main()
