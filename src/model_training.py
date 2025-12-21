@@ -158,7 +158,7 @@ def train_naive_bayes(X_train, y_train, X_val, y_val):
     print("=" * 70)
 
     # var_smoothing values to try (smaller values = less smoothing)
-    var_smoothing_options = [1e-6, 1e-5, 1e-4, 1e-3, 1e-2]
+    var_smoothing_options = [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
 
     best_acc = 0
     best_model = None
