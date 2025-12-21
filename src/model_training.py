@@ -157,3 +157,41 @@ def train_logistic_regression(X_train, y_train, X_val, y_val):
 
     return best_model
     
+# =========================
+# NAIVE BAYES MODEL
+# =========================
+def train_naive_bayes(X_train, y_train, X_val, y_val):
+    print("\n" + "=" * 70)
+    print(" TRAINING NAIVE BAYES")
+    print("=" * 70)
+
+    # var_smoothing values to try (smaller values = less smoothing)
+    var_smoothing_options = [1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
+
+    best_acc = 0
+    best_model = None
+    best_var_smoothing = None
+
+    for var_smoothing in var_smoothing_options:
+        model = GaussianNB(var_smoothing=var_smoothing)
+
+        model.fit(X_train, y_train)
+
+        val_preds = model.predict(X_val)
+        acc = accuracy_score(y_val, val_preds)
+
+        print(f"var_smoothing={var_smoothing:<8} -> Validation Accuracy={acc:.4f}")
+
+        if acc > best_acc:
+            best_acc = acc
+            best_model = model
+            best_var_smoothing = var_smoothing
+
+    save_path = os.path.join("models", "best_naive_bayes.pkl")
+    joblib.dump(best_model, save_path)
+
+    print("\n" + "=" * 40)
+    print("BEST NAIVE BAYES MODEL")
+    print(f"var_smoothing={best_var_smoothing}")
+    print(f"Accuracy={best_acc:.4f}")
+    print("=" * 40)
