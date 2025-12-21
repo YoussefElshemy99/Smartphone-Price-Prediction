@@ -195,3 +195,5 @@ def train_naive_bayes(X_train, y_train, X_val, y_val):
     print(f"var_smoothing={best_var_smoothing}")
     print(f"Accuracy={best_acc:.4f}")
     print("=" * 40)
+    return best_model
+
