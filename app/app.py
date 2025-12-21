@@ -63,6 +63,7 @@ def predict_price():
         input_data = pd.DataFrame(0, index=[0], columns=model_cols)
 
         # Fill in the specific values we have
+        # (Ensure these names match your CSV column headers exactly!)
         input_data['RAM Size GB'] = ram
         input_data['Storage Size GB'] = storage
         input_data['Clock_Speed_GHz'] = speed
@@ -79,7 +80,7 @@ def predict_price():
         if prediction == 1:
             result_label.config(text=f"Result: EXPENSIVE 💎\nConfidence: {probability * 100:.1f}%", fg="red")
         else:
-            result_label.config(text=f"Result: NON-EXPENSIVE 💰\nConfidence: {(1 - probability) * 100:.1f}%", fg="green")
+            result_label.config(text=f"Result: Non-expensive 💰\nConfidence: {(1 - probability) * 100:.1f}%", fg="green")
 
     except ValueError:
         messagebox.showerror("Input Error", "Please enter valid numbers.")

@@ -1,100 +1,104 @@
-import tkinter as tk
-from tkinter import messagebox
 import pandas as pd
-import joblib
 import numpy as np
-
-# --- 1. SETUP MAIN WINDOW ---
-root = tk.Tk()
-root.title("Smartphone Price Predictor")
-root.geometry("400x550")
-root.configure(bg="#f0f0f0")
-
-# --- 2. LOAD MODEL & SCALER ---
-# (Make sure these files exist in a 'models' folder)
-try:
-    model = joblib.load('C:\\Users\\Youssef Elshemy\\Documents\\Projects\\Smartphone-Price-Prediction\\models\\best_random_forest.pkl')
-    scaler = joblib.load('C:\\Users\\Youssef Elshemy\\Documents\\Projects\\Smartphone-Price-Prediction\\models\\scaler.pkl')
-except FileNotFoundError:
-    messagebox.showerror("Error", "Model files not found!\nRun preprocessing/training first.")
-    exit()
-
-# --- 3. DEFINE UI ELEMENTS (So the function can see them) ---
-
-# Header
-tk.Label(root, text="Phone Price Predictor", font=("Helvetica", 16, "bold"), bg="#f0f0f0").pack(pady=20)
-
-# Input Frame
-input_frame = tk.Frame(root, bg="#f0f0f0")
-input_frame.pack(pady=10)
+import re
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 
-def create_input(label_text, row):
-    tk.Label(input_frame, text=label_text, bg="#f0f0f0", font=("Arial", 10)).grid(row=row, column=0, padx=10, pady=5,
-                                                                                  sticky="e")
-    entry = tk.Entry(input_frame, width=20)
-    entry.grid(row=row, column=1, padx=10, pady=5)
-    return entry
+def get_preprocessed_data(train_path='data\\raw\\train.csv', test_path='data\\raw\\test.csv'):
+    # Load Data
+    train = pd.read_csv(train_path)
+    test = pd.read_csv(test_path)
 
+    # Drop duplicates
+    train = train.drop_duplicates()
 
-entry_ram = create_input("RAM (GB):", 0)
-entry_storage = create_input("Storage (GB):", 1)
-entry_speed = create_input("Clock Speed (GHz):", 2)
-entry_battery = create_input("Battery (mAh):", 3)
+    # Combine for consistent encoding
+    train['is_train'] = 1
+    test['is_train'] = 0
+    full_df = pd.concat([train, test], axis=0).reset_index(drop=True)
 
-# Result Label (Defined HERE so the function knows it exists)
-result_label = tk.Label(root, text="Enter specs to see result...", font=("Helvetica", 12), bg="#f0f0f0")
+    # --- CLEANING ---
 
+    # Fix Brands
+    full_df['brand'] = full_df['brand'].str.title()
 
-# --- 4. PREDICTION FUNCTION ---
-def predict_price():
-    try:
-        # Get inputs
-        ram = float(entry_ram.get())
-        storage = float(entry_storage.get())
-        speed = float(entry_speed.get())
-        battery = float(entry_battery.get())
+    # Parse Storage (e.g., "1 TB" -> 1024)
+    def parse_storage(size_str):
+        if pd.isna(size_str): return 0
+        s = str(size_str).upper()
+        if 'TB' in s: return float(s.replace('TB', '').strip()) * 1024
+        if 'GB' in s: return float(s.replace('GB', '').strip())
+        try:
+            return float(s)
+        except:
+            return 0
 
-        # Prepare Data
-        # Get all columns the model was trained on
-        model_cols = scaler.feature_names_in_
+    full_df['memory_card_size'] = full_df['memory_card_size'].apply(parse_storage)
 
-        # Create a row of zeros for all columns
-        input_data = pd.DataFrame(0, index=[0], columns=model_cols)
+    # 3. Parse OS Version (e.g., "v12" -> 12.0)
+    def parse_version(v):
+        try:
+            match = re.search(r'(\d+(\.\d+)?)', str(v))
+            if match: return float(match.group(1))
+            return 0.0
+        except:
+            return 0.0
 
-        # Fill in the specific values we have
-        # (Ensure these names match your CSV column headers exactly!)
-        input_data['RAM Size GB'] = ram
-        input_data['Storage Size GB'] = storage
-        input_data['Clock_Speed_GHz'] = speed
-        input_data['battery_capacity'] = battery
+    full_df['os_version'] = full_df['os_version'].apply(parse_version)
 
-        # Scale
-        scaled_data = scaler.transform(input_data)
+    # --- ENCODING ---
 
-        # Predict
-        prediction = model.predict(scaled_data)[0]
-        probability = model.predict_proba(scaled_data)[0][1]
+    # Map 'price' (Target)
+    full_df['price'] = full_df['price'].map({'expensive': 1, 'non-expensive': 0})
 
-        # Update Label
-        if prediction == 1:
-            result_label.config(text=f"Result: EXPENSIVE 💎\nConfidence: {probability * 100:.1f}%", fg="red")
-        else:
-            result_label.config(text=f"Result: Non-expensive 💰\nConfidence: {(1 - probability) * 100:.1f}%", fg="green")
+    # Map Yes/No columns
+    binary_cols = ['Dual_Sim', '4G', '5G', 'Vo5G', 'NFC', 'IR_Blaster', 'memory_card_support']
+    for col in binary_cols:
+        full_df[col] = full_df[col].map({'Yes': 1, 'No': 0})
 
-    except ValueError:
-        messagebox.showerror("Input Error", "Please enter valid numbers.")
-    except Exception as e:
-        messagebox.showerror("Error", f"An error occurred: {str(e)}")
+    # Ordinal Encoding (Preserving Rank)
+    tier_map = {'Unknown': 0, 'Budget': 1, 'Mid-Range': 2, 'High-End': 3, 'Flagship': 4}
+    full_df['Performance_Tier'] = full_df['Performance_Tier'].map(tier_map)
+    full_df['RAM Tier'] = full_df['RAM Tier'].map(tier_map)
 
+    # One-Hot Encoding (Nominal Data)
+    # We drop 'Processor_Series' to reduce noise
+    cols_to_dummy = ['brand', 'Processor_Brand', 'os_name', 'Notch_Type']
+    full_df = pd.get_dummies(full_df, columns=cols_to_dummy, drop_first=True)
+    full_df = full_df.drop('Processor_Series', axis=1)
 
-# --- 5. BUTTON & PACKING ---
-btn = tk.Button(root, text="PREDICT PRICE", command=predict_price,
-                bg="#2980b9", fg="white", font=("Arial", 12, "bold"), height=2, width=20)
-btn.pack(pady=30)
+    # --- SPLITTING & SCALING ---
 
-# Pack the result label last
-result_label.pack()
+    # Separate Train and Test
+    train_processed = full_df[full_df['is_train'] == 1].drop('is_train', axis=1)
+    test_processed = full_df[full_df['is_train'] == 0].drop('is_train', axis=1)
 
-# Start App
-root.mainloop()
+    # Split Train into Train (80%) and Validation (20%)
+    # Stratify ensures the proportion of expensive/non-expensive phones is consistent
+    x_train_full = train_processed.drop('price', axis=1)
+    y_train_full = train_processed['price']
+
+    features_train, features_validation, target_train, target_validation = train_test_split(
+        x_train_full, y_train_full, test_size=0.2, random_state=42, stratify=y_train_full
+    )
+
+    features_test = test_processed.drop('price', axis=1)
+    target_test = test_processed['price']
+
+    # Scale Features (Using MinMaxScaler for Naive Bayes compatibility)
+    scaler = MinMaxScaler()
+
+    # Fit ONLY on training data to avoid leakage
+    scaler.fit(features_train)
+
+    # Transform all
+    features_train = pd.DataFrame(scaler.transform(features_train), columns=features_train.columns)
+    features_validation = pd.DataFrame(scaler.transform(features_validation), columns=features_validation.columns)
+    features_test = pd.DataFrame(scaler.transform(features_test), columns=features_test.columns)
+
+    # Save
+    train_processed.to_csv('data\\processed\\processed_train.csv', index=False)
+    test_processed.to_csv('data\\processed\\processed_test.csv', index=False)
+
+    return features_train, target_train, features_validation, target_validation, features_test, target_test

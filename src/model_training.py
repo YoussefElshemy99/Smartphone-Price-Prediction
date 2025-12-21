@@ -246,6 +246,7 @@ def train_decision_tree(X_train, y_train, X_val, y_val, tune_hyperparameters=Tru
 
     return model
 
+
 def train_svm(X_train, y_train, X_val, y_val):
     print("\n" + "=" * 70)
     print(" TRAINING SUPPORT VECTOR MACHINE (SVM)")
